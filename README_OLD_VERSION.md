@@ -1,8 +1,6 @@
-# Zoho Analytics Connector v2
+# Zoho Analytics Connector
 [![Supported Versions](https://img.shields.io/pypi/pyversions/requests.svg)]()
 [![License](https://img.shields.io/npm/l/express.svg)]()
-
-[Old version](README_OLD_VERSION.md)
 
 ## Install
 
@@ -28,7 +26,7 @@ Zoho Analytics REST API supports OAuth 2.0 protocol to authorize and authenticat
 ## Import
 
 ```python
-from connector_analytics.analyticsV2 import zohoConnectV2
+from connector_analytics.analytics import zohoConnect
 ```
 
 ## Config File
@@ -71,8 +69,8 @@ class  Config:
 ## Initialize Zoho Object
 
 ```python
-        
-objZoho = zohoConnectV2(srvUrl=Config.SERVERAUTH,
+
+objZoho = zohoConnect(srvUrl=Config.SERVERAUTH,
 					tokenToRefresh=Config.REFRESHTOKEN,
 					clientId=Config.CLIENTID,
 					clientSecret=Config.CLIENTSECRET)
@@ -80,64 +78,41 @@ objZoho = zohoConnectV2(srvUrl=Config.SERVERAUTH,
 ```
 ## Add Row
 
-**Tip** : Where are workspace and view_id ? check the url of your table
-https://analytics.zoho.com/workspace/<workspace_id>/view/<view_id>
-orgid is the organization id check you setting in zoho
-
 ```python
 
-columns = {
+payload = {
 	'Id':'1',
 	'Name':'Armando Aguilar',
 	'Cell':'52-55555-555',
 	'Country':'CDMEX'}
 	
-url = 'https://analyticsapi.zoho.com'
-objZoho.addRow(srvUrl=url,
-                    workspace='51001910',
-                    view_id='5100191000',
-                    orgid='99999',
-                    columns=columns)
+objZoho.addRow(tableURL=Config.SERVERURL,columnsValues=payload)
 
 ```
 
 ## Update Row
 
-**Tip** : Where are workspace and view_id ? check the url of your table
-https://analytics.zoho.com/workspace/<workspace_id>/view/<view_id>
-orgid is the organization id check you setting in zoho
-
 ```python
 
-criteria = '\"users\".\"Id\"=\'1\''
+conditional = 'Id=1'
 
-columns = {
-    'Cell':'52-6666-666',
-	'Country':'California'
-}
+payload = {
+	'Name':'Armando Aguilar L.',
+	'Cell':'52-895578-6789',
+	'Country':'UK'}
 
-update = objZoho.updateRow(srvUrl='https://analyticsapi.zoho.com',
-                         workspace='3100191',
-                         view_id='310019',
-                         orgid='5987',
-                         criteria=criteria,
-                         columns=columns)
+update = objZoho.updateRow(tableURL=Config.SERVERURL,
+						updateInfo=payload,
+						conditionalInfo=conditional)
 
 ```
 
 ## Delete row
-**Tip** : Where are workspace and view_id ? check the url of your table
-https://analytics.zoho.com/workspace/<workspace_id>/view/<view_id>
-orgid is the organization id check you setting in zoho
 ```python
 
-criteria = '"users"."Id"=4'
-delete = objZoho2.deleteRow(srvUrl='https://analyticsapi.zoho.com',
-                         workspace='3100191,
-                         view_id='310019',
-                         orgid='5987',
-                         criteria=criteria,
-                         deleteAllRows='true')
+conditional = 'Id=1'
+delete = objZoho.deleteRow(tableURL=Config.SERVERURL,
+							conditionalInfo=conditional)
 
 ```
 <p>&nbsp;</p>
@@ -153,7 +128,7 @@ Use a simple cvs or format in a string to insert rows in the table of zoho in th
 - **UPDATEADD** Updates the row if the mentioned column values are matched, else a new entry will be added.
 <p>&nbsp;</p>
 
-|Id|Name  |Country |
+|ID|Name  |Country |
 |-|-|-|
 |1|User 1|MX|
 |2|User 2|CAD|
@@ -179,62 +154,59 @@ APPEND Appends the data into the table.
 
 ```python
 
-objZoho.importRows(srvUrl='https://analyticsapi.zoho.com',
-    workspace='4100191',
-    view_id='4100191000', 
-    data=data, 
-    importType='APPEND', 
-    orgid='897665555',
-    autoIdentify='true',
-    delimiter='1')
+objZoho.ImportRows(tableURL= Config.SERVERURL,
+					importType='APPEND',
+					importData=data, Identify=False)
 
 ```
 
 ### Update rows
+Updates the row if the mentioned column values are matched, else a new entry will be added.
 
-
-**Tip** : matchingColumns is the criterian for make the MATCHING, it can be one or more values separate by coma.
+**Tip** : Columns is the criterian for make the MATCHING, it can be one or more values separate by coma.
 ```python
 
-columns = {'id','Name','Country'}
-objZoho.importRows(srvUrl='https://analyticsapi.zoho.com',
-    workspace='4100191',
-    view_id='4100191000', 
-    data=data, 
-    importType='UPDATEADD', 
-    orgid='897665555',
-    autoIdentify='true',
-    matchingColumns=columns)
+objZoho.ImportRows(tableURL=Config.SERVERURL, 
+                    importType='UPDATEADD',
+                    importData=data,
+                    Identify=False,
+                    Columns='Id')
 
 ```
 
-### Truncat rows
-
+### Truncateadd rows
+Deletes all exisiting rows in the table and adds the imported data as new entry.
 ```python
 
-objZoho.importRows(srvUrl='https://analyticsapi.zoho.com',
-    workspace='4100191',
-    view_id='4100191000', 
-    data=data, 
-    importType='TRUNCATEADD', 
-    orgid='897665555',
-    autoIdentify='true')
+objZoho.ImportRows(tableURL=Config.SERVERURL,
+                importType='TRUNCATEADD',
+                importData=data)
 
 ```
 
-## SQL IN  ANALYTICS ZOHO
+## Read Data
 
-**Tip** : When you write the sentences SQL you need add %20 in the blank spaces.
+<p>&nbsp;</p>
+
+### Criteria field
+The criteria field is the way to make match in the table.
 
 ```python
 
-sql_query = "SELECT%20id,name,country%20FROM%20dusers%20WHERE%20country='MX'"
-data = objZoho.zohoQuery(srvUrl='https://analyticsapi.zoho.com',
-                                                orgid='000000', 
-                                                workspace='workspace name', 
-                                                table_name='users',
-                                                email='user@domain.com', 
-                                                sql_query=sql_query)
+conditional = 'Id=1'
+
+objZoho.readData(tableURL=Config.SERVERURL,criteria=conditional)
+
+```
+
+### SQL RUN
+Literal SQL Query can be used as criteria.Export using joining tables and specific columns can be done using.
+
+```python
+
+sql_query = 'SELECT \"Id\",\"Name\" FROM users Where  \"Id\" = \'1\''
+
+objZoho.readQuery(tableURL=Config.SERVERURL,queryStr=sql_query)
 
 ```
 
